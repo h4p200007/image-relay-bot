@@ -6,7 +6,7 @@ import datetime
 TOKEN = os.getenv("TOKEN")
 投稿チャンネルID = int(os.getenv("POST_CHANNEL_ID"))
 表示チャンネルID = int(os.getenv("VIEW_CHANNEL_ID"))
-カウンターファイル = 'counter.txt'
+カウンターファイル = 'counter_v2.txt'
 
 intents = discord.Intents.default()
 intents.messages = True
