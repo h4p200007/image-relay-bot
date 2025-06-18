@@ -27,7 +27,8 @@ def update_counter(n):
 
 @client.event
 async def on_ready():
-    client.start_time = datetime.datetime.utcnow()
+    from datetime import timezone  # ← 念のため関数内でも追加可
+    client.start_time = datetime.datetime.now(timezone.utc)
     client.ignore_until = client.start_time + datetime.timedelta(seconds=5)
     print(f'✅ Botログイン成功：{client.user}')
 
