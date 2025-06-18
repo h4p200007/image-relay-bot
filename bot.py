@@ -6,7 +6,7 @@ import datetime
 TOKEN = os.getenv("TOKEN")
 投稿チャンネルID = int(os.getenv("POST_CHANNEL_ID"))
 表示チャンネルID = int(os.getenv("VIEW_CHANNEL_ID"))
-カウンターファイル = 'counter_v3.txt'
+カウンターファイル = 'counter.txt'
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -27,7 +27,8 @@ def update_counter(n):
 
 @client.event
 async def on_ready():
-    client.start_time = datetime.datetime.utcnow()  # Bot起動時刻を記録
+    client.start_time = datetime.datetime.utcnow()
+    client.ignore_until = client.start_time + datetime.timedelta(seconds=5)
     print(f'✅ Botログイン成功：{client.user}')
 
 @client.event
@@ -36,8 +37,14 @@ async def on_message(message):
         return
     if message.author.bot:
         return
-    if message.created_at < client.start_time:
-        return  # Bot起動より前の投稿は無視（重複防止）
+    if message.created_at < client.ignore_until:
+        return
+
+    # ✅ 追加：!resetコマンドでカウンター初期化
+    if message.content.strip() == '!reset':
+        update_counter(1)
+        await message.channel.send('🔁 カウンターを #001 にリセットしました。')
+        return
 
     if message.attachments:
         for attachment in message.attachments:
