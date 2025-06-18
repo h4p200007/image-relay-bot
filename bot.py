@@ -1,6 +1,7 @@
 import discord
 import os
 import datetime
+from datetime import timezone  # タイムゾーン対応
 
 # --- 初期設定 ---
 TOKEN = os.getenv("TOKEN")
@@ -27,9 +28,8 @@ def update_counter(n):
 
 @client.event
 async def on_ready():
-    from datetime import timezone  # ← 念のため関数内でも追加可
-    client.start_time = datetime.datetime.now(timezone.utc)
-    client.ignore_until = client.start_time + datetime.timedelta(seconds=5)
+    client.start_time = datetime.datetime.now(timezone.utc)  # aware datetime
+    client.ignore_until = client.start_time + datetime.timedelta(seconds=5)  # 起動後5秒間の投稿を無視
     print(f'✅ Botログイン成功：{client.user}')
 
 @client.event
@@ -39,18 +39,17 @@ async def on_message(message):
     if message.author.bot:
         return
     if message.created_at < client.ignore_until:
-        return
+        return  # Bot起動直後の投稿は無視
 
-    # !reset コマンドによるカウントリセット
+    # !reset コマンド処理
     if message.content and message.content.strip() == '!reset':
         update_counter(1)
         await message.channel.send('🔁 カウンターを #001 にリセットしました。')
         return
 
-    # 添付ファイル（画像）の処理
+    # 添付画像の処理
     if message.attachments:
         for attachment in message.attachments:
-            # content_type が None の場合を考慮
             if not attachment.content_type or not attachment.content_type.startswith("image"):
                 continue
             count = get_counter()
