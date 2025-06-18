@@ -1,5 +1,6 @@
 import discord
 import os
+import datetime
 
 # --- 初期設定 ---
 TOKEN = os.getenv("TOKEN")
@@ -26,6 +27,7 @@ def update_counter(n):
 
 @client.event
 async def on_ready():
+    client.start_time = datetime.datetime.utcnow()  # Bot起動時刻を記録
     print(f'✅ Botログイン成功：{client.user}')
 
 @client.event
@@ -34,6 +36,9 @@ async def on_message(message):
         return
     if message.author.bot:
         return
+    if message.created_at < client.start_time:
+        return  # Bot起動より前の投稿は無視（重複防止）
+
     if message.attachments:
         for attachment in message.attachments:
             if attachment.content_type and attachment.content_type.startswith("image"):
@@ -41,6 +46,5 @@ async def on_message(message):
                 target_channel = client.get_channel(表示チャンネルID)
                 await target_channel.send(content=f'# {count:03d}', file=await attachment.to_file())
                 update_counter(count + 1)
-
 
 client.run(TOKEN)
