@@ -2,9 +2,9 @@ import discord
 import os
 
 # --- 初期設定 ---
-TOKEN = 'MTM4NDgwMjE4MjUyNzk3OTYxMA.Gfvmcd.VOcDR7Yi5cf9DNQjCRdKOl7KCPhQ6IRm7jA0Q4'
-投稿チャンネルID = 1384806678184202360  # ← 投稿用チャンネルのID
-表示チャンネルID = 1384806801605656587  # ← 表示用チャンネルのID
+TOKEN = os.getenv("TOKEN")
+投稿チャンネルID = int(os.getenv("POST_CHANNEL_ID"))
+表示チャンネルID = int(os.getenv("VIEW_CHANNEL_ID"))
 カウンターファイル = 'counter.txt'
 
 intents = discord.Intents.default()
@@ -30,7 +30,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.channel.id != 1384806678184202360:
+    if message.channel.id != 投稿チャンネルID:
         return
     if message.author.bot:
         return
@@ -38,7 +38,7 @@ async def on_message(message):
         for attachment in message.attachments:
             if attachment.content_type and attachment.content_type.startswith("image"):
                 count = get_counter()
-                target_channel = client.get_channel(1384806801605656587)
+                target_channel = client.get_channel(表示チャンネルID)
                 await target_channel.send(content=f'# {count:03d}', file=await attachment.to_file())
                 update_counter(count + 1)
 
