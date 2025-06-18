@@ -40,18 +40,21 @@ async def on_message(message):
     if message.created_at < client.ignore_until:
         return
 
-    # ✅ 追加：!resetコマンドでカウンター初期化
-    if message.content.strip() == '!reset':
+    # !reset コマンドによるカウントリセット
+    if message.content and message.content.strip() == '!reset':
         update_counter(1)
         await message.channel.send('🔁 カウンターを #001 にリセットしました。')
         return
 
+    # 添付ファイル（画像）の処理
     if message.attachments:
         for attachment in message.attachments:
-            if attachment.content_type and attachment.content_type.startswith("image"):
-                count = get_counter()
-                target_channel = client.get_channel(表示チャンネルID)
-                await target_channel.send(content=f'# {count:03d}', file=await attachment.to_file())
-                update_counter(count + 1)
+            # content_type が None の場合を考慮
+            if not attachment.content_type or not attachment.content_type.startswith("image"):
+                continue
+            count = get_counter()
+            target_channel = client.get_channel(表示チャンネルID)
+            await target_channel.send(content=f'# {count:03d}', file=await attachment.to_file())
+            update_counter(count + 1)
 
 client.run(TOKEN)
